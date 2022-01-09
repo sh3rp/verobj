@@ -45,10 +45,10 @@ impl Service<Request<Body>> for Svc {
                 Ok(Response::new(Body::from(str)))
             },
             (&Method::POST,path) => {
-
+                Ok(Response::new(Body::from("hi")))
             },
             (&Method::DELETE,path) => {
-
+                Ok(Response::new(Body::from("hi")))
             },
             _ => {
                 let mut not_found = Response::default();

@@ -11,8 +11,10 @@ struct Delta {
     version: u32,
 }
 
-trait KVDatastore {
+trait Datastore {
     fn Get<T>(key: String) -> Result<T,Error>
     fn Put<T>(key: String, val: T) -> Result<T,Error>
     fn Del(key: String) -> Error
 }
+
+impl 
