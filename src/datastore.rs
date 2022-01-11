@@ -12,9 +12,23 @@ struct Delta {
 }
 
 trait Datastore {
-    fn Get<T>(key: String) -> Result<T,Error>
-    fn Put<T>(key: String, val: T) -> Result<T,Error>
-    fn Del(key: String) -> Error
+    fn get<T>(&self, key: String) -> Result<T,Error>
+    fn put<T>(&self, key: String, val: T) -> Result<T,Error>
+    fn del(&self, key: String) -> Error
 }
 
-impl 
+struct KVStore<T> {
+    datastore: Store,
+}
+
+impl Datastore for KVStore<T> {
+    fn get<T>(&self, key: String) -> Result<T,Error> {}
+    fn put<T>(&self, key: String, val: T) -> Result<T,Error> {
+        #[cfg(feature = "json-value")]
+        {
+            let bucket = self.datastore.bucket<&str, Json<T>>(None)?;
+            bucket.set(key,Json(val))?;
+        }
+    }
+    fn del(&self, key: String) -> Error {}
+}
