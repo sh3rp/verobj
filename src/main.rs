@@ -1,3 +1,5 @@
+mod datastore;
+
 use kv::*;
 use hyper::service::Service;
 use hyper::{Body,Method,StatusCode,Request,Response,Server};
@@ -5,12 +7,15 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context,Poll};
 
+use crate::{Datastore,Record,KVStore};
+
 #[tokio::main]
 async fn main() -> Result<(),Box<dyn std::error::Error + Send + Sync>> {
-    let mut cfg = Config::new("./test/example1");
+    let cfg = Config::new("./test/example1");
 
     // Open the key/value store
     let store = Store::new(cfg)?;
+    let kvstore: Datastore<Record> = KVStore::<Record>();
     
     let addr = ([127,0,0,1],3000).into();
 
@@ -35,19 +40,19 @@ impl Service<Request<Body>> for Svc {
     }
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
-        fn mk_response(s: String) -> Result<Response<Body>,hyper::Error> {
-            Ok(Response::builder().body(Body::from(s)).unwrap())
-        }
+        //fn mk_response(s: String) -> Result<Response<Body>,hyper::Error> {
+        //    Ok(Response::builder().body(Body::from(s)).unwrap())
+        //}
 
         let res = match (req.method(),req.uri().path()) {
             (&Method::GET,path) => {
                 let str = String::from(format!("hi {}",path));
                 Ok(Response::new(Body::from(str)))
             },
-            (&Method::POST,path) => {
+            (&Method::POST,_path) => {
                 Ok(Response::new(Body::from("hi")))
             },
-            (&Method::DELETE,path) => {
+            (&Method::DELETE,_path) => {
                 Ok(Response::new(Body::from("hi")))
             },
             _ => {
@@ -76,7 +81,7 @@ impl<T> Service<T> for MakeSvc {
 
     fn call(&mut self, _: T) -> Self::Future {
         let datastore = self.datastore.clone();
-        let fut = async move { Ok(Svc { datastore })};
+        let fut = async move { Ok(Svc{datastore})};
         Box::pin(fut)
     }
 }
