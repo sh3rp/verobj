@@ -1,8 +1,6 @@
 
 use std::result::Result;
-use std::error::Error;
 use serde::{Serialize,Deserialize};
-use serde_json::*;
 use kv::Store;
 use kv::Json;
 
@@ -20,22 +18,23 @@ pub struct Delta {
     version: u32,
 }
 
+#[derive(Clone,Debug)]
 pub struct KVStore {
     datastore: Store,
 }
 
-pub impl KVStore {
-    fn new(ds: Store) -> KVStore {
+impl KVStore {
+    pub fn new(ds: Store) -> KVStore {
         KVStore { datastore: ds }
     }
 
-    fn get(&self, key: String) -> Result<Json<Record>,std::io::Error> {
+    pub fn get(&self, key: &str) -> Result<Json<Record>,kv::Error> {
         let bucket = self.datastore.bucket::<&str,Json<Record>>(None)?;
         let result: Json<Record> = bucket.get(key)?.unwrap();
         Ok(result)
     }
 
-    fn put(&self, key: String, val: Record) -> Result<Record,std::io::Error> {
+    pub fn put(&self, key: String, val: Record) -> Result<Json<Record>,std::io::Error> {
         #[cfg(feature = "json-value")]
         {
             let bucket = self.datastore.bucket::<&str, Json<T>>(None)?;
@@ -53,7 +52,9 @@ mod test {
 
     #[test]
     fn test_kvstore() {
-        //let ds: Datastore<Record> = KVStore::<Record>();
+        /*let cfg = Config::new("./test/example1");
+        let store = Store::new(cfg)?;
+        let ds: KVStore = KVStore::new();*/
         assert!(true);
     }
 }

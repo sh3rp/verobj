@@ -1,3 +1,5 @@
+mod datastore;
+
 use kv::*;
 use hyper::service::Service;
 use hyper::{Body,Method,StatusCode,Request,Response,Server};
@@ -16,7 +18,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error + Send + Sync>> {
     
     let addr = ([127,0,0,1],3000).into();
 
-    let server = Server::bind(&addr).serve(MakeSvc { datastore: store });
+    let server = Server::bind(&addr).serve(MakeSvc { datastore: kvstore });
     println!("Listening on http://{}",addr);
 
     server.await?;
@@ -24,7 +26,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error + Send + Sync>> {
 }
 
 struct Svc {
-    datastore: Store,
+    datastore: KVStore,
 }
 
 impl Service<Request<Body>> for Svc {
@@ -64,7 +66,7 @@ impl Service<Request<Body>> for Svc {
 }
 
 struct MakeSvc {
-    datastore: Store,
+    datastore: KVStore,
 }
 
 impl<T> Service<T> for MakeSvc {
