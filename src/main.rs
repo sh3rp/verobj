@@ -1,13 +1,10 @@
-mod datastore;
-
 use kv::*;
 use hyper::service::Service;
 use hyper::{Body,Method,StatusCode,Request,Response,Server};
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context,Poll};
-
-use crate::{Datastore,Record,KVStore};
+use crate::datastore::KVStore;
 
 #[tokio::main]
 async fn main() -> Result<(),Box<dyn std::error::Error + Send + Sync>> {
@@ -15,7 +12,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error + Send + Sync>> {
 
     // Open the key/value store
     let store = Store::new(cfg)?;
-    let kvstore: Datastore<Record> = KVStore::<Record>();
+    let kvstore: crate::datastore::KVStore = KVStore::new(store);
     
     let addr = ([127,0,0,1],3000).into();
 

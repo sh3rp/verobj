@@ -1,45 +1,50 @@
+
+use std::result::Result;
 use std::error::Error;
-use kv::*;
+use serde::{Serialize,Deserialize};
+use serde_json::*;
+use kv::Store;
+use kv::Json;
 
-#[cfg(test)]
-
-struct Record {
+#[derive(Serialize, Deserialize, PartialEq)]
+pub struct Record {
     key: String,
     deltas: Vec<Delta>,
     head: Delta,
 }
 
-struct Delta {
+#[derive(Serialize, Deserialize, PartialEq)]
+pub struct Delta {
     key: String,
     data: Vec<u8>,
     version: u32,
 }
 
-struct KVStore {
+pub struct KVStore {
     datastore: Store,
 }
 
-impl<T> KVStore<T> {
+pub impl KVStore {
     fn new(ds: Store) -> KVStore {
         KVStore { datastore: ds }
     }
 
-    fn get(&self, key: String) -> Result<Json<T>,Error> {
-        let result: Json<T> = self.datastore.bucket.get(key)?.unwrap();
+    fn get(&self, key: String) -> Result<Json<Record>,std::io::Error> {
+        let bucket = self.datastore.bucket::<&str,Json<Record>>(None)?;
+        let result: Json<Record> = bucket.get(key)?.unwrap();
         Ok(result)
     }
 
-    fn put<T>(&self, key: String, val: T) -> Result<T,Error> {
+    fn put(&self, key: String, val: Record) -> Result<Record,std::io::Error> {
         #[cfg(feature = "json-value")]
         {
-            let bucket = self.datastore.bucket<&str, Json<T>>(None)?;
+            let bucket = self.datastore.bucket::<&str, Json<T>>(None)?;
             bucket.set(key,Json(val))?;
         }
         Ok(Json(val))
     }
 
-    fn del(&self, key: String) -> Error {
-        Err(())
+    fn del(&self, key: String) {
     }
 }
 
