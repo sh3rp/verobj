@@ -53,11 +53,12 @@ impl KVStore {
 mod test {    
     use kv::*;
     use crate::{KVStore,Record,Delta};
+    use 
 
     #[test]
     fn test_kvstore() {
         let cfg = Config::new("./test/example1");
-        let store = Store::new(cfg)?;
+        let store = Store::new(cfg).unwrap();
         let ds: KVStore = KVStore::new(store);
 
         let record: Record = Record{
@@ -65,6 +66,6 @@ mod test {
         };
         ds.put(record.key,record);
         let r = ds.get(record.key).unwrap();
-        debug_assert!(r);
+        dbg!(r);
     }
 }
