@@ -5,6 +5,7 @@ use kv::Store;
 use kv::Json;
 
 #[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Clone,Debug)]
 pub struct Record {
     key: String,
     deltas: Vec<Delta>,
@@ -12,6 +13,7 @@ pub struct Record {
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Clone,Debug)]
 pub struct Delta {
     key: String,
     data: Vec<u8>,
@@ -48,13 +50,21 @@ impl KVStore {
 }
 
 #[cfg(test)]
-mod test {
+mod test {    
+    use kv::*;
+    use crate::{KVStore,Record,Delta};
 
     #[test]
     fn test_kvstore() {
-        /*let cfg = Config::new("./test/example1");
+        let cfg = Config::new("./test/example1");
         let store = Store::new(cfg)?;
-        let ds: KVStore = KVStore::new();*/
-        assert!(true);
+        let ds: KVStore = KVStore::new(store);
+
+        let record: Record = Record{
+            key: "test",
+        };
+        ds.put(record.key,record);
+        let r = ds.get(record.key).unwrap();
+        debug_assert!(r);
     }
 }
